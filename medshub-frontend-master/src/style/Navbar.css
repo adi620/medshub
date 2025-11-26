@@ -1,0 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap");
+.nav-part {
+  background-color: black;
+  height: 12vh;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-bottom: 2px solid rgb(56, 182, 255);
+}
+
+/* logo fonts */
+.logo1 {
+  font-family: "Fjalla One", sans-serif;
+  color: white;
+  font-size: 35px;
+}
+.logo2 {
+  font-family: "Rajdhani", sans-serif;
+  color: initial;
+
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke-color: white;
+  -webkit-text-stroke-width: 2px;
+
+  font-size: 50px;
+}
+
+.nav-part .nav-part-logo {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  /* background-color: crimson; */
+  width: 35vw;
+  height: 9vh;
+}
+
+.nav-part .nav-part-link {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  /* background-color: gold; */
+  width: 35vw;
+}
+
+.nav-part .nav-part-link .nav-box {
+  /* background-color: aliceblue; */
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  /* background-color: green; */
+  height: 7vh;
+  width: 11vw;
+  margin-top: 2%;
+}
+
+.nav-part .nav-part-link .cart {
+  /* background-color: aliceblue; */
+  width: 6vw;
+}
+
+.nav-part .nav-part-link .nav-box i {
+  font-size: 20px;
+  margin-top: 2%;
+}
+
+.nav-part .nav-part-link .nav-box p {
+  font-family: "Montserrat", sans-serif;
+  font-weight: bold;
+  margin: 2%;
+}

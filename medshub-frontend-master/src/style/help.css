@@ -1,0 +1,46 @@
+.main-help {
+  display: flex;
+  /* flex-direction: column; */
+}
+
+.main-help .help-container {
+  margin-top: 7%;
+}
+
+.main-help .help-container-viz {
+  margin-top: 7%;
+  margin-left: 8%;
+  /* margin-bottom: 10%; */
+}
+
+.main-help .help {
+  background-color: white;
+  color: black;
+  width: 40vw;
+  margin-left: 70%;
+  margin-bottom: 1%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
+}
+
+.main-help .help button {
+  border: 3px solid black;
+  outline: none;
+  border-radius: 50%;
+  font-size: 18px;
+}
+
+.main-help .account-details-nav {
+  margin-left: 35%;
+}
+
+/* modal style */
+.help-modal {
+  color: white;
+  background-color: black;
+  width: 35vw;
+  padding: 10px;
+  text-align: justify;
+}

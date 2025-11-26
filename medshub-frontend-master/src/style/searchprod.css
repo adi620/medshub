@@ -1,0 +1,119 @@
+.search-prod {
+  display: flex;
+}
+
+.search-prod .search-container {
+  margin-left: 27%;
+  margin-top: 3%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.search-prod .search-container .search-form form {
+  width: 45vw;
+  /* background-color: aqua; */
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.search-prod .search-container .search-form input {
+  width: 40vw;
+  height: 6vh;
+  font-size: 18px;
+  outline: none;
+  border: 3px solid white;
+  color: white;
+  background-color: black;
+}
+
+.search-prod .search-container .search-form a button {
+  background-color: white;
+  color: black;
+  height: 5vh;
+  width: 4vw;
+  outline: none;
+  border: 2px solid white;
+}
+
+.search-prod .search-container .search-form button i {
+  font-size: 23px;
+}
+
+.search-prod .search-container .searched {
+  margin-top: 2%;
+  /* background-color: crimson; */
+  width: 65vw;
+
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-prod .search-container .searched .item {
+  background-color: black;
+  color: white;
+  border: 3px solid white;
+  width: 20vw;
+  height: 40vh;
+  padding: 1%;
+  box-shadow: 0px 0px 10px whitesmoke;
+  border-radius: 8px;
+  margin-bottom: 3%;
+}
+
+.search-prod .search-container .searched .item .item-like {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.search-prod .search-container .searched .item .item-like button {
+  border: none;
+  outline: none;
+  background-color: black;
+  color: white;
+  font-size: 20px;
+}
+
+.search-prod .search-container .searched .item .item-img {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.search-prod .search-container .searched .item .item-img img {
+  /* background-color: aqua; */
+  height: 20vh;
+  width: 13vw;
+}
+
+.search-prod .search-container .searched .item .item-disc {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  /* background-color: aqua; */
+  height: 10vh;
+}
+
+.search-prod .search-container .searched .item .item-btn {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  cursor: pointer;
+}
+
+.search-prod .search-container .searched .item .item-btn button {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
+  font-weight: bold;
+  border: 3px solid white;
+  background-color: black;
+  color: white;
+  /* padding: 2% 3% 2% 3%; */
+  cursor: pointer;
+}

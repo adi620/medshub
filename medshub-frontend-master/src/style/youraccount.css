@@ -1,0 +1,32 @@
+.your-account {
+  margin-top: 8%;
+  /* background-color: crimson; */
+  width: 20vw;
+  position: fixed;
+  margin-left: 2%;
+}
+
+.your-account ul li {
+  font-size: 17px;
+  color: white;
+  margin-top: 10%;
+  margin-bottom: 10%;
+  letter-spacing: 2px;
+}
+
+.your-account ul li i {
+  margin-right: 5%;
+}
+
+.your-account ul li:active {
+  transform: scale(0.9);
+}
+.your-account ul li:focus {
+  outline: 0;
+}
+
+.your-account ul li .logout {
+  color: black;
+  font-size: 17px;
+  letter-spacing: 2px;
+}

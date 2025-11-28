@@ -31,7 +31,7 @@ const AboutViz = () => {
             <div className="devloper">
               {" "}
               <i class="far fa-user-circle " />
-              <h3>Rohit Bera</h3>
+              <h3>Aditya Malik</h3>
             </div>
             <div className="devloper">
               {" "}

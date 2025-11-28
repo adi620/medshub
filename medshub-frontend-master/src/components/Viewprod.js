@@ -14,8 +14,8 @@ import StripCheckout from "react-stripe-checkout";
 import Carousel, {
   slidesToShowPlugin,
   autoplayPlugin,
-} from "@brainhubeu/react-carousel";
-import "@brainhubeu/react-carousel/lib/style.css";
+} from "";
+import "/lib/style.css";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 Modal.setAppElement("#root");
@@ -234,7 +234,7 @@ const Viewprod = () => {
       <div className="view">
         <div className="view-prod">
           <div className="view-prod-slide">
-            <Carousel
+            <Slider
               className="slider"
               plugins={[
                 "centered",
@@ -258,7 +258,7 @@ const Viewprod = () => {
                   </div>
                 );
               })}
-            </Carousel>
+            </Slider>
           </div>
           <div className="prod-detail">
             <section>{productName}</section>

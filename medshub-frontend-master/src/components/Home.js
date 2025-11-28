@@ -32,8 +32,8 @@ import { chatBotData } from "../Data/Reducers/chatBot.reducer";
 import Carousel, {
   slidesToShowPlugin,
   autoplayPlugin,
-} from "@brainhubeu/react-carousel";
-import "@brainhubeu/react-carousel/lib/style.css";
+} from "";
+import "/lib/style.css";
 import { introQueryApi, textqueryApi } from "../Data/Services/Oneforall";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -187,7 +187,7 @@ const Home = () => {
               </Link>
             </label>
 
-            <Carousel
+            <Slider
               className="slider"
               plugins={[
                 "centered",
@@ -238,7 +238,7 @@ const Home = () => {
                   <img src={zandu} alt="Zandu_img" />
                 </div>
               </Link>
-            </Carousel>
+            </Slider>
           </div>
 
           <div className="home-categories">

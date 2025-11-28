@@ -8,8 +8,8 @@ import "../style/viewmeds.css";
 import Carousel, {
   slidesToShowPlugin,
   autoplayPlugin,
-} from "@brainhubeu/react-carousel";
-import "@brainhubeu/react-carousel/lib/style.css";
+} from "";
+import "/lib/style.css";
 import { useSelector, useDispatch } from "react-redux";
 import { Triangle, Rings, Oval } from "react-loader-spinner";
 import StripCheckout from "react-stripe-checkout";
@@ -229,7 +229,7 @@ const Viewmed = () => {
       <div className="view">
         <div className="view-prod">
           <div className="view-prod-slide">
-            <Carousel
+            <Slider
               className="slider"
               plugins={[
                 "centered",
@@ -253,7 +253,7 @@ const Viewmed = () => {
                   </div>
                 );
               })}
-            </Carousel>
+            </Slider>
           </div>
           <div className="prod-detail">
             <section>{medicineName}</section>

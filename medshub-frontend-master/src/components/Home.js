@@ -1,5 +1,7 @@
 import { React, useEffect, useRef, useState } from "react";
 import "../style/home.css";
+
+// Brand images
 import dabur from "../images/dabur-banner.jfif";
 import dettol from "../images/dettol-banner.jpg";
 import garnier from "../images/garnier-banner.jpg";
@@ -7,14 +9,20 @@ import himalya from "../images/himalya-banner.jfif";
 import mamaearth from "../images/mamaearth-banner.jfif";
 import muscleblaze from "../images/muscleblaze-banner.jfif";
 import zandu from "../images/zandu-banner.jfif";
+
+// Category images
 import sanitizer from "../images/sanitizer.png";
 import babies from "../images/babies.png";
 import fitness from "../images/fitness.jpg";
 import devices from "../images/devies.jpg";
+
+// Beauty images
 import facialkit from "../images/facial-kit.png";
 import haircare from "../images/haircare.jfif";
 import lipcare from "../images/lipcare.jpg";
 import bodycare from "../images/bodycare.jpg";
+
+// Men's grooming
 import beardoil from "../images/beardoil.jpg";
 import beardwash from "../images/beardwash.jfif";
 import hairgel from "../images/hairgel.jpg";
@@ -23,25 +31,23 @@ import mendeo from "../images/mendeodrant.jfif";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 
-// requirements
 import { Link } from "react-router-dom";
 import Modal from "react-modal/lib/components/Modal";
 import { ThreeDots } from "react-loader-spinner";
 import { toast } from "react-toastify";
-import { chatBotData } from "../Data/Reducers/chatBot.reducer";
 
-// NEW SLIDER (react-slick)
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 import { introQueryApi, textqueryApi } from "../Data/Services/Oneforall";
 import { useDispatch, useSelector } from "react-redux";
+import { chatBotData } from "../Data/Reducers/chatBot.reducer";
 
 const Home = () => {
   const conversation = useSelector(
-    (state) => state.chatBotReducer
-  ).conversation;
+    (state) => state.chatBotReducer.conversation
+  );
 
   const messageEndRef = useRef(null);
 
@@ -52,9 +58,10 @@ const Home = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [userMessage, setuserMessage] = useState("");
   const [loader, setLoader] = useState(false);
-  const [start, setStart] = useState("");
 
   const dispatch = useDispatch();
+
+  Modal.setAppElement("#root");
 
   const customStyles = {
     content: {
@@ -69,59 +76,43 @@ const Home = () => {
     },
   };
 
-  const referesh = (e) => {
-    e.preventDefault();
-  };
-
-  const takeInput = (e) => {
-    setuserMessage(e.target.value);
-  };
+  const takeInput = (e) => setuserMessage(e.target.value);
 
   const textQuery = async () => {
-    if (userMessage === "") {
-      toast.info("no input found!", {
+    if (userMessage.trim() === "") {
+      return toast.info("no input found!", {
         position: "bottom-right",
         theme: "dark",
       });
-    } else {
-      setLoader(true);
-
-      const response = await textqueryApi(userMessage);
-
-      const user = response.result.data.query;
-      const bot = response.result.data.reply;
-
-      dispatch(chatBotData({ user }));
-      dispatch(chatBotData({ bot }));
-
-      if (response) {
-        setuserMessage("");
-        setLoader(false);
-      }
     }
+
+    setLoader(true);
+
+    const response = await textqueryApi(userMessage);
+    const user = response.result?.data?.query;
+    const bot = response.result?.data?.reply;
+
+    if (user) dispatch(chatBotData({ user }));
+    if (bot) dispatch(chatBotData({ bot }));
+
+    setuserMessage("");
+    setLoader(false);
   };
 
   const intro = async () => {
-    try {
-      setLoader(true);
-      const response = await introQueryApi();
+    setLoader(true);
 
-      if (response) {
-        setLoader(false);
-        setStart(response.result.data.reply);
-      }
+    const response = await introQueryApi();
+    const bot = response.result?.data?.reply;
 
-      const bot = response.result.data.reply;
-
-      if (conversation.length === 0) {
-        dispatch(chatBotData({ bot }));
-      }
-    } catch (error) {
-      console.log("error: ", error);
+    if (conversation.length === 0 && bot) {
+      dispatch(chatBotData({ bot }));
     }
+
+    setLoader(false);
   };
 
-  // ⭐ NEW SLIDER SETTINGS
+  // SAFE SLIDER SETTINGS
   const brandSliderSettings = {
     infinite: true,
     slidesToShow: 3,
@@ -133,6 +124,16 @@ const Home = () => {
     centerMode: true,
     centerPadding: "10px",
   };
+
+  const topBrands = [
+    dabur,
+    dettol,
+    garnier,
+    himalya,
+    mamaearth,
+    muscleblaze,
+    zandu,
+  ];
 
   return (
     <>
@@ -148,16 +149,19 @@ const Home = () => {
         <i className="fas fa-user-nurse"></i>
       </button>
 
+      {/* MAIN HERO */}
       <div className="aboutus-part">
         <div className="about-container">
           <div className="logo"></div>
           <div className="home-bg"></div>
+
           <div className="about">
             <label>
               Medshub 24/7 <br />
-              delivers the daily required health products ,<br />
-              Prescribed medicines and medicines
+              delivers your health products, <br />
+              prescribed medicines and more.
             </label>
+
             <div className="home-card">
               <Link to="/searchproducts">
                 <div className="search-product">
@@ -191,68 +195,35 @@ const Home = () => {
         </div>
       </div>
 
-      {/* ------------------------ TOP BRANDS SLIDER ------------------------ */}
+      {/* TOP BRANDS */}
       <div className="home-parent">
         <div className="home">
           <div className="home-top-brands">
             <label>
               <Link to="/productCategories/ourBrands">
-                <span className="font3">Top</span>{" "}
+                <span className="font3">Top</span>
                 <span className="font4">Brands</span>
               </Link>
             </label>
 
-            {/* ⭐ NEW SLIDER */}
-            <Slider {...brandSliderSettings} className="slider">
-              <Link to="/productCategories/Brandproducts/dabur">
-                <div className="brand">
-                  <img src={dabur} alt="Dabur_img" />
+            <Slider {...brandSliderSettings}>
+              {topBrands.map((img, idx) => (
+                <div key={idx}>
+                  <Link to="/productCategories/ourBrands">
+                    <div className="brand">
+                      <img src={img} alt={`brand-${idx}`} />
+                    </div>
+                  </Link>
                 </div>
-              </Link>
-
-              <Link to="/productCategories/Brandproducts/dettol">
-                <div className="brand">
-                  <img src={dettol} alt="Dettol_img" />
-                </div>
-              </Link>
-
-              <Link to="/productCategories/Brandproducts/garnier">
-                <div className="brand">
-                  <img src={garnier} alt="Garnier_img" />
-                </div>
-              </Link>
-
-              <Link to="/productCategories/Brandproducts/himalya">
-                <div className="brand">
-                  <img src={himalya} alt="Himalya_img" />
-                </div>
-              </Link>
-
-              <Link to="/productCategories/Brandproducts/mamaearth">
-                <div className="brand">
-                  <img src={mamaearth} alt="Mamaearth_img" />
-                </div>
-              </Link>
-
-              <Link to="/productCategories/Brandproducts/muscleblaze">
-                <div className="brand">
-                  <img src={muscleblaze} alt="Muscleblaze_img" />
-                </div>
-              </Link>
-
-              <Link to="/productCategories/Brandproducts/zandu">
-                <div className="brand">
-                  <img src={zandu} alt="Zandu_img" />
-                </div>
-              </Link>
+              ))}
             </Slider>
           </div>
 
-          {/* ------------------------ SHOP BY CATEGORY ------------------------ */}
+          {/* SHOP BY CATEGORY */}
           <div className="home-categories">
             <div className="categories1">
               <div className="category big-img">
-                <img src={sanitizer} alt="precautions-from-covid" />
+                <img src={sanitizer} alt="covid" />
                 <Link to="/productCategories/covid-essentials">
                   <p>Safety from Covid</p>
                 </Link>
@@ -268,7 +239,7 @@ const Home = () => {
               <div className="categories">
                 <Link to="/productCategories/momandbabies">
                   <div className="category">
-                    <img src={babies} alt="mom-and-babies" />
+                    <img src={babies} alt="babies" />
                     <p>Mom and Babies</p>
                   </div>
                 </Link>
@@ -282,7 +253,7 @@ const Home = () => {
 
                 <Link to="/productCategories/devices">
                   <div className="category">
-                    <img src={devices} alt="health-devices" />
+                    <img src={devices} alt="devices" />
                     <p>Devices</p>
                   </div>
                 </Link>
@@ -290,7 +261,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* ------------------------ BEAUTY SECTION ------------------------ */}
+          {/* BEAUTY */}
           <div className="home-beauty">
             <div className="home-beauty-container">
               <div className="beauty-bg">
@@ -298,76 +269,43 @@ const Home = () => {
                   <div className="home-beauty-title">
                     <p>
                       <Link to="/productCategories/Beautyproducts">
-                        <span className="font1">Beauty</span>{" "}
+                        <span className="font1">Beauty</span>
                         <span className="font2">Products</span>
                       </Link>
                     </p>
                   </div>
 
                   <div className="home-beauty-body">
-                    <Link to="/productCategories/Beautyproducts/haircare">
-                      <div className="beauty-product">
-                        <img src={haircare} />
-                        <p>Hair Care</p>
-                      </div>
-                    </Link>
-
-                    <Link to="/productCategories/Beautyproducts/facialkit">
-                      <div className="beauty-product">
-                        <img src={facialkit} />
-                        <p>Facial Kit</p>
-                      </div>
-                    </Link>
-
-                    <Link to="/productCategories/Beautyproducts/lipcare">
-                      <div className="beauty-product">
-                        <img src={lipcare} />
-                        <p>Lip Care</p>
-                      </div>
-                    </Link>
-
-                    <Link to="/productCategories/Beautyproducts/bodycare">
-                      <div className="beauty-product">
-                        <img src={bodycare} />
-                        <p>Body Care</p>
-                      </div>
-                    </Link>
+                    {[haircare, facialkit, lipcare, bodycare].map(
+                      (img, idx) => (
+                        <Link
+                          key={idx}
+                          to="/productCategories/Beautyproducts"
+                        >
+                          <div className="beauty-product">
+                            <img src={img} alt="beauty" />
+                            <p>Beauty</p>
+                          </div>
+                        </Link>
+                      )
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ------------------------ MEN's GROOMING ------------------------ */}
+          {/* MEN'S GROOMING */}
           <div className="home-men">
             <div className="slider">
-              <Link to="/productCategories/Men'sgrooming/beardoil">
-                <div className="men-card">
-                  <img src={beardoil} alt="beard_img" />
-                  <p>Beard Oil</p>
-                </div>
-              </Link>
-
-              <Link to="/productCategories/Men'sgrooming/beardwash">
-                <div className="men-card">
-                  <img src={beardwash} alt="beardwash_img" />
-                  <p>Beard Wash</p>
-                </div>
-              </Link>
-
-              <Link to="/productCategories/Men'sgrooming/hairgel">
-                <div className="men-card">
-                  <img src={hairgel} alt="hairgel_img" />
-                  <p>Hair Gel</p>
-                </div>
-              </Link>
-
-              <Link to="/productCategories/Men'sgrooming/mendeo">
-                <div className="men-card">
-                  <img src={mendeo} alt="mendeo_img" />
-                  <p>Men Deodrant</p>
-                </div>
-              </Link>
+              {[beardoil, beardwash, hairgel, mendeo].map((img, idx) => (
+                <Link key={idx} to="/productCategories/Men'sgrooming">
+                  <div className="men-card">
+                    <img src={img} alt="men" />
+                    <p>Grooming</p>
+                  </div>
+                </Link>
+              ))}
             </div>
 
             <label>
@@ -382,7 +320,7 @@ const Home = () => {
 
       <Footer />
 
-      {/* ------------------------ CHAT MODAL ------------------------ */}
+      {/* CHATBOT MODAL */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -392,59 +330,51 @@ const Home = () => {
         <div className="bot-body">
           <div className="bot-container">
             <div className="bot-close">
-              <button className="cancel" onClick={() => setModalIsOpen(false)}>
+              <button
+                className="cancel"
+                onClick={() => setModalIsOpen(false)}
+              >
                 x
               </button>
             </div>
 
-            <div className="bot-body">
-              <div className="chat">
-                <div className="chat-bot">
-                  {/* Chatbot rendering */}
-                  {conversation !== []
-                    ? conversation.map((msg) => {
-                        if (msg.bot) {
-                          return (
-                            <div className="sender">
-                              <p>{msg.bot}</p>
-                            </div>
-                          );
-                        } else if (msg.user) {
-                          return (
-                            <div className="receiver">
-                              <p>{msg.user}</p>
-                            </div>
-                          );
-                        }
-                      })
-                    : ""}
+            <div className="chat">
+              <div className="chat-bot">
+                {Array.isArray(conversation) &&
+                  conversation.map((msg, idx) => {
+                    if (msg.bot)
+                      return (
+                        <div key={idx} className="sender">
+                          <p>{String(msg.bot)}</p>
+                        </div>
+                      );
 
-                  <div ref={messageEndRef} />
-                </div>
+                    if (msg.user)
+                      return (
+                        <div key={idx} className="receiver">
+                          <p>{String(msg.user)}</p>
+                        </div>
+                      );
+
+                    return null;
+                  })}
+
+                <div ref={messageEndRef} />
               </div>
             </div>
 
             <div className="bot-button">
-              <form onSubmit={(e) => referesh(e)}>
+              <form onSubmit={(e) => e.preventDefault()}>
                 <input
                   type="text"
                   className="textbox"
-                  name="userMessage"
                   value={userMessage}
                   onChange={takeInput}
                 />
 
                 <button className="send" onClick={textQuery}>
-                  {loader === true ? (
-                    <label
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-around",
-                        alignItems: "center",
-                      }}
-                    >
-                      <ThreeDots color="white" height={30} width={30} />
-                    </label>
+                  {loader ? (
+                    <ThreeDots color="white" height={30} width={30} />
                   ) : (
                     <i className="far fa-paper-plane"></i>
                   )}

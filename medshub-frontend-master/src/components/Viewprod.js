@@ -7,13 +7,14 @@ import {
   postprodWishlistApi,
   placeOrderProductApi,
 } from "../Data/Services/Oneforall";
+
 import Modal from "react-modal/lib/components/Modal";
 import { Triangle } from "react-loader-spinner";
-import StripCheckout from "react-stripe-checkout";
+import StripeCheckout from "react-stripe-checkout";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
-// ⭐ NEW SLIDER (react-slick instead of @brainhubeu/react-carousel)
+// ⭐ NEW SLIDER (react-slick)
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -22,39 +23,24 @@ Modal.setAppElement("#root");
 
 const Viewprod = () => {
   // ================================== STATES
-  const _id = useSelector((state) => state.productReducer)._id;
-  const productName = useSelector((state) => state.productReducer).productName;
-  const productImage = useSelector(
-    (state) => state.productReducer
-  ).productImage;
-  const productBrand = useSelector(
-    (state) => state.productReducer
-  ).productBrand;
-  const productCategory = useSelector(
-    (state) => state.productReducer
-  ).productCategory;
-  const productPrice = useSelector(
-    (state) => state.productReducer
-  ).productPrice;
-  const productStatus = useSelector(
-    (state) => state.productReducer
-  ).availableStatus;
-  const productDescription = useSelector(
-    (state) => state.productReducer
-  ).productDescription;
+  const storeProduct = useSelector((state) => state.productReducer);
 
-  const token = useSelector((state) => state.userReducer).token;
+  // defensive fallback: ensure object exists
+  const {
+    _id = "",
+    productName = "",
+    productImage = [],
+    productBrand = "",
+    productCategory = "",
+    productPrice = "",
+    availableStatus: productStatus = false,
+    productDescription = "",
+  } = storeProduct || {};
 
-  const prodItem = {
-    _id,
-    productName,
-    productImage,
-    productBrand,
-    productCategory,
-    productPrice,
-    productStatus,
-    productDescription,
-  };
+  const token = useSelector((state) => state.userReducer)?.token;
+
+  // Debug for Vercel (DO NOT REMOVE)
+  console.log("productImage is:", productImage);
 
   const [feedback, setFeedback] = useState("");
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -184,7 +170,7 @@ const Viewprod = () => {
       .catch((error) => console.log("error:", error));
   };
 
-  // ⭐ New slider settings
+  // ⭐ Slider settings
   const sliderSettings = {
     infinite: true,
     slidesToShow: 1,
@@ -197,6 +183,15 @@ const Viewprod = () => {
     centerPadding: "0px",
   };
 
+  // ⭐ Normalizing productImage to ALWAYS be an array for slider
+  const normalizedImages = Array.isArray(productImage)
+    ? productImage
+    : productImage && typeof productImage === "object"
+    ? Object.values(productImage)
+    : typeof productImage === "string"
+    ? [productImage]
+    : [];
+
   return (
     <>
       <Navbar />
@@ -206,11 +201,17 @@ const Viewprod = () => {
           {/* PRODUCT IMAGE SLIDER */}
           <div className="view-prod-slide">
             <Slider {...sliderSettings} className="slider">
-              {productImage.map((img, idx) => (
-                <div className="brand" key={idx}>
-                  <img src={img} alt="product" />
+              {normalizedImages.length > 0 ? (
+                normalizedImages.map((img, idx) => (
+                  <div className="brand" key={idx}>
+                    <img src={img} alt="product" />
+                  </div>
+                ))
+              ) : (
+                <div className="brand">
+                  <img src="/fallback.png" alt="no product" />
                 </div>
-              ))}
+              )}
             </Slider>
           </div>
 
@@ -236,7 +237,9 @@ const Viewprod = () => {
               <p>₹{productPrice}</p>
             </section>
 
-            <section className="product-description">{productDescription}</section>
+            <section className="product-description">
+              {productDescription}
+            </section>
 
             {/* ACTION BUTTONS */}
             <section className="btn">
@@ -246,7 +249,16 @@ const Viewprod = () => {
                 className="buynow"
                 onClick={() => {
                   setProdBuyModal(true);
-                  takeProductItem(prodItem);
+                  takeProductItem({
+                    _id,
+                    productName,
+                    productImage,
+                    productBrand,
+                    productCategory,
+                    productPrice,
+                    productStatus,
+                    productDescription,
+                  });
                 }}
               >
                 Buy Now
@@ -276,7 +288,7 @@ const Viewprod = () => {
                       Cancel
                     </button>
 
-                    <StripCheckout
+                    <StripeCheckout
                       stripeKey="pk_test_51K9BzESJxF1xgWl3hAPFSmTRUHtri2Vb2QmboXnSvvdcD0XaNuqwiUmdDJIwZ10VYHCdJskzHLJoERsFQS5mmUWD00leevPB9M"
                       token={makePaymentProduct}
                       name="Make Payment"
@@ -284,7 +296,7 @@ const Viewprod = () => {
                       billingAddress
                     >
                       <button className="yes">pay ₹{amount}</button>
-                    </StripCheckout>
+                    </StripeCheckout>
                   </div>
                 </div>
               </Modal>

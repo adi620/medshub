@@ -19,21 +19,22 @@ import beardoil from "../images/beardoil.jpg";
 import beardwash from "../images/beardwash.jfif";
 import hairgel from "../images/hairgel.jpg";
 import mendeo from "../images/mendeodrant.jfif";
+
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-//requirements
+
+// requirements
 import { Link } from "react-router-dom";
 import Modal from "react-modal/lib/components/Modal";
-import { Triangle, Rings, Oval, ThreeDots } from "react-loader-spinner";
+import { ThreeDots } from "react-loader-spinner";
 import { toast } from "react-toastify";
 import { chatBotData } from "../Data/Reducers/chatBot.reducer";
 
-//for slider
-import Carousel, {
-  slidesToShowPlugin,
-  autoplayPlugin,
-} from "";
-import "/lib/style.css";
+// NEW SLIDER (react-slick)
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 import { introQueryApi, textqueryApi } from "../Data/Services/Oneforall";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -42,11 +43,12 @@ const Home = () => {
     (state) => state.chatBotReducer
   ).conversation;
 
+  const messageEndRef = useRef(null);
+
   useEffect(() => {
     messageEndRef.current?.scrollIntoView();
   }, [conversation]);
 
-  const messageEndRef = useRef(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [userMessage, setuserMessage] = useState("");
   const [loader, setLoader] = useState(false);
@@ -83,10 +85,8 @@ const Home = () => {
       });
     } else {
       setLoader(true);
-      console.log("userMessage: ", userMessage);
 
       const response = await textqueryApi(userMessage);
-      console.log("response: ", response);
 
       const user = response.result.data.query;
       const bot = response.result.data.reply;
@@ -105,7 +105,6 @@ const Home = () => {
     try {
       setLoader(true);
       const response = await introQueryApi();
-      console.log("response: ", response);
 
       if (response) {
         setLoader(false);
@@ -122,9 +121,23 @@ const Home = () => {
     }
   };
 
+  // ⭐ NEW SLIDER SETTINGS
+  const brandSliderSettings = {
+    infinite: true,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 2500,
+    arrows: true,
+    speed: 800,
+    centerMode: true,
+    centerPadding: "10px",
+  };
+
   return (
     <>
       <Navbar />
+
       <button
         className="nurse"
         onClick={() => {
@@ -132,7 +145,7 @@ const Home = () => {
           intro();
         }}
       >
-        <i class="fas fa-user-nurse"></i>
+        <i className="fas fa-user-nurse"></i>
       </button>
 
       <div className="aboutus-part">
@@ -148,27 +161,28 @@ const Home = () => {
             <div className="home-card">
               <Link to="/searchproducts">
                 <div className="search-product">
-                  <i class="fas fa-search"></i>
+                  <i className="fas fa-search"></i>
                   <p>search product</p>
                 </div>
               </Link>
+
               <Link to="/productCategories/ourBrands">
                 <div className="card-prod">
-                  <i class="fas fa-truck-loading"></i>
+                  <i className="fas fa-truck-loading"></i>
                   <p>health product</p>
                 </div>
               </Link>
 
               <Link to="/medicines">
                 <div className="card-med">
-                  <i class="fas fa-prescription-bottle-alt"></i>
+                  <i className="fas fa-prescription-bottle-alt"></i>
                   <p>medicines</p>
                 </div>
               </Link>
 
               <Link to="/searchmedicines">
                 <div className="search-medicine">
-                  <i class="fas fa-search-plus"></i>
+                  <i className="fas fa-search-plus"></i>
                   <p>search medicine</p>
                 </div>
               </Link>
@@ -177,6 +191,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* ------------------------ TOP BRANDS SLIDER ------------------------ */}
       <div className="home-parent">
         <div className="home">
           <div className="home-top-brands">
@@ -187,52 +202,44 @@ const Home = () => {
               </Link>
             </label>
 
-            <Slider
-              className="slider"
-              plugins={[
-                "centered",
-                "infinite",
-                "arrows",
-                {
-                  resolve: autoplayPlugin,
-                  options: {
-                    numberOfSlides: 3,
-                    interval: 4000,
-                  },
-                },
-              ]}
-              animationSpeed={1000}
-            >
+            {/* ⭐ NEW SLIDER */}
+            <Slider {...brandSliderSettings} className="slider">
               <Link to="/productCategories/Brandproducts/dabur">
                 <div className="brand">
                   <img src={dabur} alt="Dabur_img" />
                 </div>
               </Link>
+
               <Link to="/productCategories/Brandproducts/dettol">
                 <div className="brand">
                   <img src={dettol} alt="Dettol_img" />
                 </div>
               </Link>
+
               <Link to="/productCategories/Brandproducts/garnier">
                 <div className="brand">
                   <img src={garnier} alt="Garnier_img" />
                 </div>
               </Link>
+
               <Link to="/productCategories/Brandproducts/himalya">
                 <div className="brand">
                   <img src={himalya} alt="Himalya_img" />
                 </div>
               </Link>
+
               <Link to="/productCategories/Brandproducts/mamaearth">
                 <div className="brand">
                   <img src={mamaearth} alt="Mamaearth_img" />
                 </div>
               </Link>
+
               <Link to="/productCategories/Brandproducts/muscleblaze">
                 <div className="brand">
                   <img src={muscleblaze} alt="Muscleblaze_img" />
                 </div>
               </Link>
+
               <Link to="/productCategories/Brandproducts/zandu">
                 <div className="brand">
                   <img src={zandu} alt="Zandu_img" />
@@ -241,6 +248,7 @@ const Home = () => {
             </Slider>
           </div>
 
+          {/* ------------------------ SHOP BY CATEGORY ------------------------ */}
           <div className="home-categories">
             <div className="categories1">
               <div className="category big-img">
@@ -250,11 +258,13 @@ const Home = () => {
                 </Link>
               </div>
             </div>
+
             <div className="categories2">
               <label>
                 <span className="font3">Shop By</span>
                 <span className="font4">Category</span>
               </label>
+
               <div className="categories">
                 <Link to="/productCategories/momandbabies">
                   <div className="category">
@@ -269,6 +279,7 @@ const Home = () => {
                     <p>Fitness</p>
                   </div>
                 </Link>
+
                 <Link to="/productCategories/devices">
                   <div className="category">
                     <img src={devices} alt="health-devices" />
@@ -279,6 +290,7 @@ const Home = () => {
             </div>
           </div>
 
+          {/* ------------------------ BEAUTY SECTION ------------------------ */}
           <div className="home-beauty">
             <div className="home-beauty-container">
               <div className="beauty-bg">
@@ -291,6 +303,7 @@ const Home = () => {
                       </Link>
                     </p>
                   </div>
+
                   <div className="home-beauty-body">
                     <Link to="/productCategories/Beautyproducts/haircare">
                       <div className="beauty-product">
@@ -298,18 +311,21 @@ const Home = () => {
                         <p>Hair Care</p>
                       </div>
                     </Link>
+
                     <Link to="/productCategories/Beautyproducts/facialkit">
                       <div className="beauty-product">
                         <img src={facialkit} />
                         <p>Facial Kit</p>
                       </div>
                     </Link>
+
                     <Link to="/productCategories/Beautyproducts/lipcare">
                       <div className="beauty-product">
                         <img src={lipcare} />
                         <p>Lip Care</p>
                       </div>
                     </Link>
+
                     <Link to="/productCategories/Beautyproducts/bodycare">
                       <div className="beauty-product">
                         <img src={bodycare} />
@@ -322,6 +338,7 @@ const Home = () => {
             </div>
           </div>
 
+          {/* ------------------------ MEN's GROOMING ------------------------ */}
           <div className="home-men">
             <div className="slider">
               <Link to="/productCategories/Men'sgrooming/beardoil">
@@ -330,18 +347,21 @@ const Home = () => {
                   <p>Beard Oil</p>
                 </div>
               </Link>
+
               <Link to="/productCategories/Men'sgrooming/beardwash">
                 <div className="men-card">
                   <img src={beardwash} alt="beardwash_img" />
                   <p>Beard Wash</p>
                 </div>
               </Link>
+
               <Link to="/productCategories/Men'sgrooming/hairgel">
                 <div className="men-card">
                   <img src={hairgel} alt="hairgel_img" />
                   <p>Hair Gel</p>
                 </div>
               </Link>
+
               <Link to="/productCategories/Men'sgrooming/mendeo">
                 <div className="men-card">
                   <img src={mendeo} alt="mendeo_img" />
@@ -362,6 +382,7 @@ const Home = () => {
 
       <Footer />
 
+      {/* ------------------------ CHAT MODAL ------------------------ */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -375,12 +396,11 @@ const Home = () => {
                 x
               </button>
             </div>
+
             <div className="bot-body">
               <div className="chat">
                 <div className="chat-bot">
-                  {/* chatbot */}
-
-                  {/* {console.log("conversation :", conversation)} */}
+                  {/* Chatbot rendering */}
                   {conversation !== []
                     ? conversation.map((msg) => {
                         if (msg.bot) {
@@ -398,10 +418,12 @@ const Home = () => {
                         }
                       })
                     : ""}
+
                   <div ref={messageEndRef} />
                 </div>
               </div>
             </div>
+
             <div className="bot-button">
               <form onSubmit={(e) => referesh(e)}>
                 <input
@@ -411,6 +433,7 @@ const Home = () => {
                   value={userMessage}
                   onChange={takeInput}
                 />
+
                 <button className="send" onClick={textQuery}>
                   {loader === true ? (
                     <label
@@ -423,7 +446,7 @@ const Home = () => {
                       <ThreeDots color="white" height={30} width={30} />
                     </label>
                   ) : (
-                    <i class="far fa-paper-plane"></i>
+                    <i className="far fa-paper-plane"></i>
                   )}
                 </button>
               </form>

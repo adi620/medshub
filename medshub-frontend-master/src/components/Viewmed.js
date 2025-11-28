@@ -1,19 +1,14 @@
 import { React, useState } from "react";
 import "../style/category.css";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Modal from "react-modal/lib/components/Modal";
 import "../style/viewmeds.css";
 
-//for slider
-import Carousel, {
-  slidesToShowPlugin,
-  autoplayPlugin,
-} from "";
-import "/lib/style.css";
 import { useSelector, useDispatch } from "react-redux";
-import { Triangle, Rings, Oval } from "react-loader-spinner";
+import { Triangle } from "react-loader-spinner";
 import StripCheckout from "react-stripe-checkout";
 import Navbar from "./Navbar";
+
 import {
   postMedFeedbackApi,
   postMedWishlistApi,
@@ -21,15 +16,20 @@ import {
 } from "../Data/Services/Oneforall";
 import { toast } from "react-toastify";
 
+// ⭐ New slider imports
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 Modal.setAppElement("#root");
 
 const Viewmed = () => {
   // ======================================================== states
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
-  const [medBuyModal, setMedBuyModal] = useState(false); // medicine buy modal
-  const [medicineItem, setMedicineItem] = useState(null); // mediicne item state
-  const [amount, setAmount] = useState(); // price state
+  const [medBuyModal, setMedBuyModal] = useState(false);
+  const [medicineItem, setMedicineItem] = useState(null);
+  const [amount, setAmount] = useState();
 
   const token = useSelector((state) => state.userReducer).token;
 
@@ -78,24 +78,20 @@ const Viewmed = () => {
     };
 
     const response = await postMedWishlistApi(_id, item, token);
-    console.log("response: ", response);
-
-    if (response) {
-      setModalIsOpen(false);
-    }
+    setModalIsOpen(false);
 
     if (response.status === 200 && response.data.status === "200") {
       toast.success("added to wishlist!", {
         position: "bottom-right",
         theme: "dark",
       });
-    } else if (response.data.error.code === 400) {
+    } else if (response.data.error?.code === 400) {
       toast.info("already exist in wishlist!", {
         position: "bottom-right",
         theme: "dark",
       });
     } else {
-      toast.error("error occured! try again later", {
+      toast.error("error occurred! try again later", {
         position: "bottom-right",
         theme: "dark",
       });
@@ -112,41 +108,34 @@ const Viewmed = () => {
 
   const postMedFeedback = async () => {
     if (feedback === "") {
-      toast.info("no input found! ", {
+      return toast.info("no input found! ", {
         theme: "dark",
         position: "bottom-right",
       });
+    }
+
+    setModalIsOpen(true);
+
+    const data = { feedback, medicineId: _id, medicineName };
+
+    const response = await postMedFeedbackApi(data, token);
+
+    setModalIsOpen(false);
+    setFeedback("");
+
+    if (response.status === 200) {
+      toast.success("feedback sent!", {
+        theme: "colored",
+        position: "bottom-right",
+      });
     } else {
-      setModalIsOpen(true);
-      console.log("feed : ", feedback);
-
-      const medicineId = _id;
-
-      const data = { feedback, medicineId, medicineName };
-
-      const response = await postMedFeedbackApi(data, token);
-      console.log("response: ", response);
-
-      if (response) {
-        setModalIsOpen(false);
-        setFeedback("");
-      }
-
-      if (response.status === 200) {
-        toast.success("feedback send!", {
-          theme: "colored",
-          position: "bottom-right",
-        });
-      } else {
-        toast.error("error occured! try sometime later.", {
-          theme: "colored",
-          position: "bottom-right",
-        });
-      }
+      toast.error("error occurred! try sometime later.", {
+        theme: "colored",
+        position: "bottom-right",
+      });
     }
   };
 
-  // take item state of medicine
   const takeMedicineItem = () => {
     const medicine = {
       _id,
@@ -156,23 +145,16 @@ const Viewmed = () => {
       manufacturerName,
       availableStatus,
     };
-    console.log("medicine item: ", medicine);
-
     setMedicineItem(medicine);
     setAmount(medicinePrice);
   };
 
-  // place order for medicine
   const placeOrderMedicine = async () => {
     setModalIsOpen(true);
-    console.log(" medicineItem : ", medicineItem);
 
     const response = await placeOrderMedicineApi(medicineItem, token);
-    console.log("response place order: ", response);
 
-    if (response) {
-      setModalIsOpen(false);
-    }
+    setModalIsOpen(false);
 
     if (response.status === 200 && response.data.status === "200") {
       toast.success("order placed!", {
@@ -180,47 +162,44 @@ const Viewmed = () => {
         theme: "dark",
       });
     } else {
-      toast.error("error occured! try again later", {
+      toast.error("error occurred! try again later", {
         position: "top-right",
         theme: "dark",
       });
     }
   };
 
-  // place order for medicine
   const makePaymentMedicine = async (token) => {
-    console.log("medicine Item : ", medicineItem);
-
     const { medicineName, medicinePrice } = medicineItem;
-    const price = medicinePrice;
-    const name = medicineName;
 
-    const item = { name, price };
+    const item = { name: medicineName, price: medicinePrice };
 
-    const body = {
-      token,
-      item,
-    };
-    const headers = {
-      "Content-Type": "application/json",
-    };
+    const body = { token, item };
 
     return await fetch(`http://localhost:5500/paymentStripe`, {
-      method: "Post",
-      headers,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
       .then((response) => {
-        console.log("Response", response);
-        const { status } = response;
-        console.log("Status", status);
-        if (status === 200) {
+        if (response.status === 200) {
           placeOrderMedicine();
         }
       })
-      .catch((error) => {
-        console.log("error: ", error);
-      });
+      .catch((error) => console.log("error:", error));
+  };
+
+  // ⭐ NEW SLIDER SETTINGS
+  const sliderSettings = {
+    infinite: true,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 2500,
+    arrows: true,
+    speed: 800,
+    centerMode: true,
+    centerPadding: "0px",
   };
 
   return (
@@ -229,66 +208,38 @@ const Viewmed = () => {
       <div className="view">
         <div className="view-prod">
           <div className="view-prod-slide">
-            <Slider
-              className="slider"
-              plugins={[
-                "centered",
-                "infinite",
-                "arrows",
-                {
-                  resolve: slidesToShowPlugin,
-                  autoplayPlugin,
-                  options: {
-                    numberOfSlides: 1,
-                    interval: 4000,
-                  },
-                },
-              ]}
-              animationSpeed={1000}
-            >
-              {medicineImage.map((img) => {
-                return (
-                  <div className="brand" id="img1">
-                    <img src={img} alt="_img" />
-                  </div>
-                );
-              })}
+            {/* ⭐ NEW SLIDER */}
+            <Slider {...sliderSettings} className="slider">
+              {medicineImage.map((img, idx) => (
+                <div className="brand" id="img1" key={idx}>
+                  <img src={img} alt="_img" />
+                </div>
+              ))}
             </Slider>
           </div>
+
           <div className="prod-detail">
             <section>{medicineName}</section>
-            <section> ₹{medicinePrice}</section>
+            <section>₹{medicinePrice}</section>
+
             <section>
               {availableStatus ? (
-                <p
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-around",
-                    alignItems: "center",
-                  }}
-                >
-                  <p className="green"></p>
-                  In Stock
+                <p className="inStock">
+                  <span className="green"></span> In Stock
                 </p>
               ) : (
-                <p
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-around",
-                    alignItems: "center",
-                  }}
-                >
-                  <p className="red"></p>
-                  Out of Stock
+                <p className="outStock">
+                  <span className="red"></span> Out of Stock
                 </p>
               )}
             </section>
+
             <section>{manufacturerName}</section>
             <section style={{ width: "40vw" }}>{medicineDescription}</section>
+
             <section className="btn">
-              <button onClick={() => addMedtoWishlist()}>
-                Add to Wishlist
-              </button>
+              <button onClick={addMedtoWishlist}>Add to Wishlist</button>
+
               <button
                 onClick={() => {
                   setMedBuyModal(true);
@@ -297,25 +248,29 @@ const Viewmed = () => {
               >
                 Buy Now
               </button>
+
+              {/* BUY MODAL */}
               <Modal isOpen={medBuyModal} style={customStyles}>
-                <div className="buy-modal-conatiner">
+                <div className="buy-modal-container">
                   <div className="buy-modal-cancel">
                     <button onClick={() => setMedBuyModal(false)}>
-                      <i class="fas fa-times"></i>
+                      <i className="fas fa-times"></i>
                     </button>
                   </div>
+
                   <div className="buy-modal-body">
                     <p>
                       Are you sure <br />
                       you want to buy now?
                     </p>
                   </div>
+
                   <div className="buy-modal-btn">
                     <button
                       className="no"
                       onClick={() => setMedBuyModal(false)}
                     >
-                      cancel
+                      Cancel
                     </button>
 
                     <StripCheckout
@@ -325,16 +280,7 @@ const Viewmed = () => {
                       shippingAddress
                       billingAddress
                     >
-                      <button
-                        class="btn btn-md bg-warning"
-                        className="yes"
-                        onClick={() => {
-                          setMedBuyModal(false);
-                          // makePayment();
-                        }}
-                      >
-                        pay ₹{amount}
-                      </button>
+                      <button className="yes">pay ₹{amount}</button>
                     </StripCheckout>
                   </div>
                 </div>
@@ -342,11 +288,12 @@ const Viewmed = () => {
             </section>
           </div>
         </div>
+
+        {/* FEEDBACK */}
         <div className="view-prod-feedback">
           <form onSubmit={(e) => refresh(e)}>
             <p>Feedback of product</p>
             <textarea
-              className=""
               placeholder="write a review"
               name="feedback"
               onChange={takeInput}
@@ -356,11 +303,8 @@ const Viewmed = () => {
         </div>
       </div>
 
-      <Modal
-        isOpen={modalIsOpen}
-        // onRequestClose={() => setModalIsOpen(false)}
-        style={customStyles}
-      >
+      {/* GLOBAL LOADER */}
+      <Modal isOpen={modalIsOpen} style={customStyles}>
         <div
           style={{
             width: "7vw",
@@ -370,12 +314,7 @@ const Viewmed = () => {
             alignItems: "center",
           }}
         >
-          <Triangle
-            color="black
-          "
-            height={100}
-            width={100}
-          />
+          <Triangle color="black" height={100} width={100} />
         </div>
       </Modal>
     </>

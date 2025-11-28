@@ -1,5 +1,5 @@
 import { React, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../style/viewprod.css";
 import Navbar from "./Navbar";
 import {
@@ -8,20 +8,20 @@ import {
   placeOrderProductApi,
 } from "../Data/Services/Oneforall";
 import Modal from "react-modal/lib/components/Modal";
-import { Triangle, Rings, Oval } from "react-loader-spinner";
+import { Triangle } from "react-loader-spinner";
 import StripCheckout from "react-stripe-checkout";
-//for slider
-import Carousel, {
-  slidesToShowPlugin,
-  autoplayPlugin,
-} from "";
-import "/lib/style.css";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+
+// ⭐ NEW SLIDER (react-slick instead of @brainhubeu/react-carousel)
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 Modal.setAppElement("#root");
 
 const Viewprod = () => {
-  // ==================================states
+  // ================================== STATES
   const _id = useSelector((state) => state.productReducer)._id;
   const productName = useSelector((state) => state.productReducer).productName;
   const productImage = useSelector(
@@ -43,6 +43,8 @@ const Viewprod = () => {
     (state) => state.productReducer
   ).productDescription;
 
+  const token = useSelector((state) => state.userReducer).token;
+
   const prodItem = {
     _id,
     productName,
@@ -56,11 +58,9 @@ const Viewprod = () => {
 
   const [feedback, setFeedback] = useState("");
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const token = useSelector((state) => state.userReducer).token;
-
-  const [prodBuyModal, setProdBuyModal] = useState(false); // product buy modal
-  const [productItem, setProductItem] = useState(null); // product item state
-  const [amount, setAmount] = useState(); // price state
+  const [prodBuyModal, setProdBuyModal] = useState(false);
+  const [productItem, setProductItem] = useState(null);
+  const [amount, setAmount] = useState();
 
   const customStyles = {
     content: {
@@ -74,7 +74,7 @@ const Viewprod = () => {
     },
   };
 
-  // ===========================================functions
+  // =========================================== FUNCTIONS
   const addProdtoWishlist = async () => {
     setModalIsOpen(true);
 
@@ -88,96 +88,70 @@ const Viewprod = () => {
       productPrice,
       productStatus,
     };
-    console.log("item :", item);
 
     const response = await postprodWishlistApi(_id, item, token);
-
-    console.log("response: ", response);
-    if (response) {
-      setModalIsOpen(false);
-      setFeedback("");
-    }
+    setModalIsOpen(false);
 
     if (response.status === 200 && response.data.status === "200") {
       toast.success("added to wishlist!", {
         position: "bottom-right",
         theme: "dark",
       });
-    } else if (response.data.error.code === 400) {
+    } else if (response.data.error?.code === 400) {
       toast.info("already exist in wishlist!", {
         position: "bottom-right",
         theme: "dark",
       });
     } else {
-      toast.error("error occured! try again later", {
+      toast.error("error occurred! try again later", {
         position: "bottom-right",
         theme: "dark",
       });
     }
   };
 
-  const refresh = (e) => {
-    e.preventDefault();
-  };
-
-  const takeInput = (e) => {
-    setFeedback(e.target.value);
-  };
+  const takeInput = (e) => setFeedback(e.target.value);
 
   const sendProdFeedback = async () => {
     if (feedback === "") {
-      toast.info("no input found!", {
+      return toast.info("no input found!", {
         theme: "dark",
         position: "bottom-right",
       });
+    }
+
+    setModalIsOpen(true);
+
+    const data = { feedback, _id, productName, productBrand };
+    const response = await postProdFeedbackApi(data, token);
+
+    setModalIsOpen(false);
+    setFeedback("");
+
+    if (response.status === 200) {
+      toast.success("feedback sent!", {
+        theme: "colored",
+        position: "bottom-right",
+      });
     } else {
-      setModalIsOpen(true);
-
-      console.log("feed : ", feedback);
-
-      const data = { feedback, _id, productName, productBrand };
-
-      const response = await postProdFeedbackApi(data, token);
-      console.log("response: ", response);
-      if (response) {
-        setModalIsOpen(false);
-        setFeedback("");
-      }
-
-      if (response.status === 200) {
-        toast.success("feedback send!", {
-          theme: "colored",
-          position: "bottom-right",
-        });
-      } else {
-        toast.error("error occured! try sometime later.", {
-          theme: "colored",
-          position: "bottom-right",
-        });
-      }
+      toast.error("error occurred! try again later.", {
+        theme: "colored",
+        position: "bottom-right",
+      });
     }
   };
 
-  // take item state of product
   const takeProductItem = (item) => {
-    console.log("product item: ", item);
     setProductItem(item);
     setAmount(item.productPrice);
   };
 
-  // place order for product
   const placeOrderProduct = async () => {
     setModalIsOpen(true);
-    console.log("productItem : ", productItem);
-
-    const {} = productItem;
 
     const response = await placeOrderProductApi(productItem, token);
-    console.log("response place order: ", response);
 
-    if (response) {
-      setModalIsOpen(false);
-    }
+    setModalIsOpen(false);
 
     if (response.status === 200 && response.data.status === "200") {
       toast.success("order placed!", {
@@ -185,127 +159,89 @@ const Viewprod = () => {
         theme: "dark",
       });
     } else {
-      toast.error("error occured! try again later", {
+      toast.error("error occurred! try again later", {
         position: "top-right",
         theme: "dark",
       });
     }
   };
 
-  // payment for product
   const makePaymentProduct = async (token) => {
-    console.log("product Item : ", productItem);
-
     const { productName, productPrice } = productItem;
-    const price = productPrice;
-    const name = productName;
 
-    const item = { name, price };
+    const item = { name: productName, price: productPrice };
 
-    const body = {
-      token,
-      item,
-    };
-    const headers = {
-      "Content-Type": "application/json",
-    };
+    const body = { token, item };
 
     return await fetch(`http://localhost:5500/paymentStripe`, {
-      method: "Post",
-      headers,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     })
       .then((response) => {
-        console.log("Response", response);
-        const { status } = response;
-        console.log("Status", status);
-        if (status === 200) {
-          placeOrderProduct();
-        }
+        if (response.status === 200) placeOrderProduct();
       })
-      .catch((error) => {
-        console.log("error: ", error);
-      });
+      .catch((error) => console.log("error:", error));
+  };
+
+  // ⭐ New slider settings
+  const sliderSettings = {
+    infinite: true,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 2500,
+    arrows: true,
+    speed: 800,
+    centerMode: true,
+    centerPadding: "0px",
   };
 
   return (
     <>
       <Navbar />
+
       <div className="view">
         <div className="view-prod">
+          {/* PRODUCT IMAGE SLIDER */}
           <div className="view-prod-slide">
-            <Slider
-              className="slider"
-              plugins={[
-                "centered",
-                "infinite",
-                "arrows",
-                {
-                  resolve: slidesToShowPlugin,
-                  autoplayPlugin,
-                  options: {
-                    numberOfSlides: 1,
-                    interval: 4000,
-                  },
-                },
-              ]}
-              animationSpeed={1000}
-            >
-              {productImage.map((img) => {
-                return (
-                  <div className="brand">
-                    <img src={img} alt="_img" />
-                  </div>
-                );
-              })}
+            <Slider {...sliderSettings} className="slider">
+              {productImage.map((img, idx) => (
+                <div className="brand" key={idx}>
+                  <img src={img} alt="product" />
+                </div>
+              ))}
             </Slider>
           </div>
+
+          {/* PRODUCT DETAILS */}
           <div className="prod-detail">
             <section>{productName}</section>
+
             <section>
               {productStatus ? (
-                <p
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-around",
-                    alignItems: "center",
-                    height: "5vh",
-                  }}
-                >
-                  <p className="green"></p>
-                  In Stock
+                <p className="inStock">
+                  <span className="green"></span> In Stock
                 </p>
               ) : (
-                <p
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-around",
-                    alignItems: "center",
-                  }}
-                >
-                  <p className="red"></p>
-                  Out of Stock
+                <p className="outStock">
+                  <span className="red"></span> Out of Stock
                 </p>
               )}
             </section>
-            <section
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-                width: "18vw",
-              }}
-            >
+
+            <section className="product-info-row">
               <p>{productCategory}</p>
               <p>{productBrand}</p>
-              <p> ₹{productPrice}</p>
+              <p>₹{productPrice}</p>
             </section>
-            <section style={{ width: "40vw", textAlign: "center" }}>
-              {productDescription}
-            </section>
+
+            <section className="product-description">{productDescription}</section>
+
+            {/* ACTION BUTTONS */}
             <section className="btn">
-              <button onClick={() => addProdtoWishlist()}>
-                Add to Wishlist
-              </button>
+              <button onClick={addProdtoWishlist}>Add to Wishlist</button>
+
               <button
                 className="buynow"
                 onClick={() => {
@@ -315,25 +251,29 @@ const Viewprod = () => {
               >
                 Buy Now
               </button>
+
+              {/* BUY MODAL */}
               <Modal isOpen={prodBuyModal} style={customStyles}>
-                <div className="buy-modal-conatiner">
+                <div className="buy-modal-container">
                   <div className="buy-modal-cancel">
                     <button onClick={() => setProdBuyModal(false)}>
-                      <i class="fas fa-times"></i>
+                      <i className="fas fa-times"></i>
                     </button>
                   </div>
+
                   <div className="buy-modal-body">
                     <p>
                       Are you sure <br />
                       you want to buy now?
                     </p>
                   </div>
+
                   <div className="buy-modal-btn">
                     <button
                       className="no"
                       onClick={() => setProdBuyModal(false)}
                     >
-                      cancel
+                      Cancel
                     </button>
 
                     <StripCheckout
@@ -343,16 +283,7 @@ const Viewprod = () => {
                       shippingAddress
                       billingAddress
                     >
-                      <button
-                        class="btn btn-md bg-warning"
-                        className="yes"
-                        onClick={() => {
-                          setProdBuyModal(false);
-                          // makePayment();
-                        }}
-                      >
-                        pay ₹{amount}
-                      </button>
+                      <button className="yes">pay ₹{amount}</button>
                     </StripCheckout>
                   </div>
                 </div>
@@ -360,15 +291,14 @@ const Viewprod = () => {
             </section>
           </div>
         </div>
+
+        {/* FEEDBACK SECTION */}
         <div className="view-prod-feedback">
-          <form onSubmit={(e) => refresh(e)}>
+          <form onSubmit={(e) => e.preventDefault()}>
             <p>Feedback of product</p>
             <textarea
-              className=""
               placeholder="write a review"
               rows="10"
-              cols="40"
-              name="prodFeedback"
               value={feedback}
               onChange={takeInput}
             ></textarea>
@@ -377,26 +307,10 @@ const Viewprod = () => {
         </div>
       </div>
 
-      <Modal
-        isOpen={modalIsOpen}
-        // onRequestClose={() => setModalIsOpen(false)}
-        style={customStyles}
-      >
-        <div
-          style={{
-            width: "7vw",
-            height: "13vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Triangle
-            color="black
-          "
-            height={100}
-            width={100}
-          />
+      {/* GLOBAL LOADING MODAL */}
+      <Modal isOpen={modalIsOpen} style={customStyles}>
+        <div className="loader-container">
+          <Triangle color="black" height={100} width={100} />
         </div>
       </Modal>
     </>

@@ -1,26 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const path = require("path");
+
 const auth = require("../middlewares/auth");
 const adminauth = require("../middlewares/adminauth");
+const upload = require("../config/multer"); // ✅ CLOUDINARY MULTER
 
-// image storing
-const storage = multer.diskStorage({
-  destination: "./upload/productimages",
-  filename: (req, file, cb) => {
-    return cb(
-      null,
-      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
-
-const upload = multer({
-  storage: storage,
-});
-
-// CORRECTED CONTROLLER PATH
 const {
   addProduct,
   getProduct,
@@ -32,12 +16,12 @@ const {
   getSearchProductbyCategory,
 } = require("../controllers/product.controller");
 
-// admin routes
+// ✅ ADMIN ROUTES
 router.post(
   "/addProduct",
   auth,
   adminauth,
-  upload.array("productImage", 4),
+  upload.array("productImage", 4), // ✅ CLOUDINARY UPLOAD
   addProduct
 );
 
@@ -47,13 +31,13 @@ router.put(
   "/updateProduct/:id",
   auth,
   adminauth,
-  upload.array("productImage", 4),
+  upload.array("productImage", 4), // ✅ CLOUDINARY UPLOAD
   updateProduct
 );
 
 router.delete("/deleteProduct/:id", auth, adminauth, deleteProduct);
 
-// user routes
+// ✅ USER ROUTES
 router.get("/getProducts", getProduct);
 router.get("/getAllProducts", getAllProduct);
 router.get("/getSearchProduct/:name", getSearchProduct);

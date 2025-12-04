@@ -1,10 +1,9 @@
 const Product = require("../models/productModel");
-const fs = require("fs");
 const service = require("../services/product.service");
 const HttpError = require("../middlewares/HttpError");
 
 // ======================================================================
-//                        ADD PRODUCT
+//                        ADD PRODUCT  ✅ CLOUDINARY FIX
 // ======================================================================
 const addProduct = async (req, res, next) => {
   try {
@@ -21,8 +20,8 @@ const addProduct = async (req, res, next) => {
       return next(new HttpError(400, "No product images uploaded"));
     }
 
-    const url = req.protocol + "://" + req.get("host");
-    const productImage = req.files.map(file => `${url}/productimages/${file.filename}`);
+    // ✅ SAVE CLOUDINARY IMAGE URLs DIRECTLY
+    const productImage = req.files.map(file => file.path);
 
     const body = {
       productName,
@@ -46,7 +45,7 @@ const addProduct = async (req, res, next) => {
 };
 
 // ======================================================================
-//                        UPDATE PRODUCT
+//                        UPDATE PRODUCT ✅ CLOUDINARY FIX
 // ======================================================================
 const updateProduct = async (req, res, next) => {
   try {
@@ -63,10 +62,9 @@ const updateProduct = async (req, res, next) => {
 
     let finalImages = productImage; // default: existing images
 
-    // If new images uploaded, replace with new ones
+    // ✅ If new images uploaded → use Cloudinary URLs
     if (req.files && req.files.length > 0) {
-      const url = req.protocol + "://" + req.get("host");
-      finalImages = req.files.map(file => `${url}/productimages/${file.filename}`);
+      finalImages = req.files.map(file => file.path);
     }
 
     const body = {
